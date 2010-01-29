@@ -17,11 +17,7 @@
 		not, see <http://www.gnu.org/licenses/>.
 	-->
 <resources>
-	<string name="app_name">WebSMS Connector: o2</string>
-	<string name="app_version">0.2</string>
-	<string name="connector_o2_author">Felix Bechstein &lt;f@ub0r.de&gt;</string>
-	<string name="connector_o2_name">o2</string>
-	<string name="connector_o2_preferences">Preferences - o2</string>
-	<string name="enable_o2">Enable o2</string>
-	<string name="password_o2_hint">Password for o2online.de</string>
+	<string name="connector_o2_preferences">Einstellungen - o2</string>
+	<string name="enable_o2">Aktiviere o2</string>
+	<string name="password_o2_hint">Passwort für o2online.de</string>
 </resources>
