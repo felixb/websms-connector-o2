@@ -52,6 +52,9 @@ public class ConnectorO2 extends Connector {
 	/** Tag for output. */
 	private static final String TAG = "o2";
 
+	/** Trust all SSL certs. */
+	private static final boolean TRUSTALL = true;
+
 	/** Custom Dateformater. */
 	private static final String DATEFORMAT = "yyyy,MM,dd,kk,mm,00";
 
@@ -211,7 +214,7 @@ public class ConnectorO2 extends Connector {
 			throws IOException, MalformedCookieException, URISyntaxException,
 			WebSMSException {
 		HttpResponse response = Utils.getHttpClient(URL_CAPTCHA, cookies, null,
-				TARGET_AGENT, URL_LOGIN);
+				TARGET_AGENT, URL_LOGIN, TRUSTALL);
 		int resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
 			throw new WebSMSException(context, R.string.error_http, "" + resp);
@@ -243,7 +246,7 @@ public class ConnectorO2 extends Connector {
 		postData.add(new BasicNameValuePair("_eventId", "submit"));
 		postData.add(new BasicNameValuePair("riddleValue", captchaSolve));
 		response = Utils.getHttpClient(URL_SOLVECAPTCHA, cookies, postData,
-				TARGET_AGENT, URL_LOGIN);
+				TARGET_AGENT, URL_LOGIN, TRUSTALL);
 		Log.d(TAG, cookies.toString());
 		Log.d(TAG, postData.toString());
 		resp = response.getStatusLine().getStatusCode();
@@ -297,7 +300,7 @@ public class ConnectorO2 extends Connector {
 				Preferences.PREFS_PASSWORD, "")));
 		postData.add(new BasicNameValuePair("_eventId", "login"));
 		HttpResponse response = Utils.getHttpClient(URL_LOGIN, cookies,
-				postData, TARGET_AGENT, URL_PRELOGIN);
+				postData, TARGET_AGENT, URL_PRELOGIN, TRUSTALL);
 		int resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
 			throw new WebSMSException(context, R.string.error_http, "" + resp);
@@ -446,7 +449,7 @@ public class ConnectorO2 extends Connector {
 		st = null;
 
 		HttpResponse response = Utils.getHttpClient(url, cookies, postData,
-				TARGET_AGENT, URL_PRESEND);
+				TARGET_AGENT, URL_PRESEND, TRUSTALL);
 		postData = null;
 		int resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
@@ -509,7 +512,7 @@ public class ConnectorO2 extends Connector {
 				Log.d(TAG, "init session");
 				// pre-login
 				response = Utils.getHttpClient(URL_PRELOGIN, cookies, null,
-						TARGET_AGENT, null);
+						TARGET_AGENT, null, TRUSTALL);
 				resp = response.getStatusLine().getStatusCode();
 				if (resp != HttpURLConnection.HTTP_OK) {
 					throw new WebSMSException(context, R.string.error_http, ""
@@ -530,7 +533,7 @@ public class ConnectorO2 extends Connector {
 
 				// sms-center
 				response = Utils.getHttpClient(URL_SMSCENTER, cookies, null,
-						TARGET_AGENT, URL_LOGIN);
+						TARGET_AGENT, URL_LOGIN, TRUSTALL);
 				resp = response.getStatusLine().getStatusCode();
 				if (resp != HttpURLConnection.HTTP_OK) {
 					if (reuseSession) {
@@ -547,7 +550,7 @@ public class ConnectorO2 extends Connector {
 
 			// pre-send
 			response = Utils.getHttpClient(URL_PRESEND, cookies, null,
-					TARGET_AGENT, URL_SMSCENTER);
+					TARGET_AGENT, URL_SMSCENTER, TRUSTALL);
 			resp = response.getStatusLine().getStatusCode();
 			if (resp != HttpURLConnection.HTTP_OK) {
 				if (reuseSession) {
