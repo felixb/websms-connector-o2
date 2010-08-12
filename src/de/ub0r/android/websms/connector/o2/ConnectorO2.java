@@ -206,13 +206,10 @@ public class ConnectorO2 extends Connector {
 	 *             MalformedCookieException
 	 * @throws URISyntaxException
 	 *             URISyntaxException
-	 * @throws WebSMSException
-	 *             WebSMSException
 	 */
 	private boolean solveCaptcha(final Context context,
 			final ArrayList<Cookie> cookies, final String flow)
-			throws IOException, MalformedCookieException, URISyntaxException,
-			WebSMSException {
+			throws IOException, MalformedCookieException, URISyntaxException {
 		HttpResponse response = Utils.getHttpClient(URL_CAPTCHA, cookies, null,
 				TARGET_AGENT, URL_LOGIN, TRUSTALL);
 		int resp = response.getStatusLine().getStatusCode();
@@ -280,13 +277,11 @@ public class ConnectorO2 extends Connector {
 	 *             MalformedCookieException
 	 * @throws URISyntaxException
 	 *             URISyntaxException
-	 * @throws WebSMSException
-	 *             WebSMSException
 	 */
 	private boolean login(final Context context,
 			final ConnectorCommand command, final ArrayList<Cookie> cookies,
 			final String flow) throws IOException, MalformedCookieException,
-			URISyntaxException, WebSMSException {
+			URISyntaxException {
 		// post data
 		final ArrayList<BasicNameValuePair> postData = // .
 		new ArrayList<BasicNameValuePair>(4);
@@ -369,13 +364,11 @@ public class ConnectorO2 extends Connector {
 	 *             MalformedCookieException
 	 * @throws URISyntaxException
 	 *             URISyntaxException
-	 * @throws WebSMSException
-	 *             WebSMSException
 	 */
 	private void sendToO2(final Context context,
 			final ConnectorCommand command, final ArrayList<Cookie> cookies,
 			final String htmlText) throws IOException,
-			MalformedCookieException, URISyntaxException, WebSMSException {
+			MalformedCookieException, URISyntaxException {
 		ArrayList<BasicNameValuePair> postData = // .
 		new ArrayList<BasicNameValuePair>();
 		postData.add(new BasicNameValuePair("SMSTo", Utils
@@ -487,13 +480,10 @@ public class ConnectorO2 extends Connector {
 	 *            {@link ConnectorCommand}
 	 * @param reuseSession
 	 *            try to reuse existing session
-	 * @throws WebSMSException
-	 *             WebSMSException
 	 */
 	@SuppressWarnings("unchecked")
 	private void sendData(final Context context,
-			final ConnectorCommand command, final boolean reuseSession)
-			throws WebSMSException {
+			final ConnectorCommand command, final boolean reuseSession) {
 		Log.d(TAG, "sendData(" + reuseSession + ")");
 		ArrayList<Cookie> cookies;
 		if (staticCookies == null) {
@@ -623,8 +613,7 @@ public class ConnectorO2 extends Connector {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected final void doUpdate(final Context context, final Intent intent)
-			throws WebSMSException {
+	protected final void doUpdate(final Context context, final Intent intent) {
 		this.sendData(context, new ConnectorCommand(intent), true);
 	}
 
@@ -632,8 +621,7 @@ public class ConnectorO2 extends Connector {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected final void doSend(final Context context, final Intent intent)
-			throws WebSMSException {
+	protected final void doSend(final Context context, final Intent intent) {
 		this.sendData(context, new ConnectorCommand(intent), true);
 	}
 
