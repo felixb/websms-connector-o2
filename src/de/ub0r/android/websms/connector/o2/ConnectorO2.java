@@ -26,7 +26,6 @@ import java.util.Calendar;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.cookie.Cookie;
-import org.apache.http.cookie.MalformedCookieException;
 import org.apache.http.message.BasicNameValuePair;
 
 import android.content.Context;
@@ -195,28 +194,20 @@ public class ConnectorO2 extends Connector {
 	 * 
 	 * @param context
 	 *            {@link Context}
-	 * @param cookies
-	 *            {@link Cookie}s
 	 * @param flow
 	 *            _flowExecutionKey
 	 * @return true if captcha was solved
 	 * @throws IOException
 	 *             IOException
-	 * @throws MalformedCookieException
-	 *             MalformedCookieException
-	 * @throws URISyntaxException
-	 *             URISyntaxException
 	 */
-	private boolean solveCaptcha(final Context context,
-			final ArrayList<Cookie> cookies, final String flow)
-			throws IOException, MalformedCookieException, URISyntaxException {
-		HttpResponse response = Utils.getHttpClient(URL_CAPTCHA, cookies, null,
+	private boolean solveCaptcha(final Context context, final String flow)
+			throws IOException {
+		HttpResponse response = Utils.getHttpClient(URL_CAPTCHA, null, null,
 				TARGET_AGENT, URL_LOGIN, TRUSTALL);
 		int resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
 			throw new WebSMSException(context, R.string.error_http, "" + resp);
 		}
-		Utils.updateCookies(cookies, response.getAllHeaders(), URL_CAPTCHA);
 		BitmapDrawable captcha = new BitmapDrawable(response.getEntity()
 				.getContent());
 		final Intent intent = new Intent(Connector.ACTION_CAPTCHA_REQUEST);
@@ -242,15 +233,13 @@ public class ConnectorO2 extends Connector {
 		postData.add(new BasicNameValuePair("_flowExecutionKey", flow));
 		postData.add(new BasicNameValuePair("_eventId", "submit"));
 		postData.add(new BasicNameValuePair("riddleValue", captchaSolve));
-		response = Utils.getHttpClient(URL_SOLVECAPTCHA, cookies, postData,
+		response = Utils.getHttpClient(URL_SOLVECAPTCHA, null, postData,
 				TARGET_AGENT, URL_LOGIN, TRUSTALL);
-		Log.d(TAG, cookies.toString());
 		Log.d(TAG, postData.toString());
 		resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
 			throw new WebSMSException(context, R.string.error_http, "" + resp);
 		}
-		Utils.updateCookies(cookies, response.getAllHeaders(), URL_CAPTCHA);
 		final String mHtmlText = Utils.stream2str(response.getEntity()
 				.getContent());
 		if (mHtmlText.indexOf(CHECK_WRONGCAPTCHA) > 0) {
@@ -266,22 +255,15 @@ public class ConnectorO2 extends Connector {
 	 *            Context
 	 * @param command
 	 *            ConnectorCommand
-	 * @param cookies
-	 *            {@link Cookie}s
 	 * @param flow
 	 *            _flowExecutionKey
 	 * @return true if logged in
 	 * @throws IOException
 	 *             IOException
-	 * @throws MalformedCookieException
-	 *             MalformedCookieException
-	 * @throws URISyntaxException
-	 *             URISyntaxException
 	 */
 	private boolean login(final Context context,
-			final ConnectorCommand command, final ArrayList<Cookie> cookies,
-			final String flow) throws IOException, MalformedCookieException,
-			URISyntaxException {
+			final ConnectorCommand command, final String flow)
+			throws IOException {
 		// post data
 		final ArrayList<BasicNameValuePair> postData = // .
 		new ArrayList<BasicNameValuePair>(4);
@@ -294,15 +276,14 @@ public class ConnectorO2 extends Connector {
 		postData.add(new BasicNameValuePair("password", p.getString(
 				Preferences.PREFS_PASSWORD, "")));
 		postData.add(new BasicNameValuePair("_eventId", "login"));
-		HttpResponse response = Utils.getHttpClient(URL_LOGIN, cookies,
-				postData, TARGET_AGENT, URL_PRELOGIN, TRUSTALL);
+		int ccount = Utils.getCookieCount();
+		HttpResponse response = Utils.getHttpClient(URL_LOGIN, null, postData,
+				TARGET_AGENT, URL_PRELOGIN, TRUSTALL);
 		int resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
 			throw new WebSMSException(context, R.string.error_http, "" + resp);
 		}
-		resp = cookies.size();
-		Utils.updateCookies(cookies, response.getAllHeaders(), URL_LOGIN);
-		if (resp == cookies.size()) {
+		if (ccount == Utils.getCookieCount()) {
 			String htmlText = null;
 			if (PreferenceManager.getDefaultSharedPreferences(context)
 					.getBoolean(Preferences.PREFS_TWEAK, false)) {
@@ -315,7 +296,7 @@ public class ConnectorO2 extends Connector {
 			if (htmlText != null && htmlText.indexOf("captcha") > 0) {
 				final String newFlow = getFlowExecutionkey(htmlText);
 				htmlText = null;
-				if (!this.solveCaptcha(context, cookies, newFlow)) {
+				if (!this.solveCaptcha(context, newFlow)) {
 					throw new WebSMSException(context,
 							R.string.error_wrongcaptcha);
 				}
@@ -354,21 +335,16 @@ public class ConnectorO2 extends Connector {
 	 *            {@link Context}
 	 * @param command
 	 *            {@link ConnectorCommand}
-	 * @param cookies
-	 *            {@link Cookie}s
 	 * @param htmlText
 	 *            html source of previous site
 	 * @throws IOException
 	 *             IOException
-	 * @throws MalformedCookieException
-	 *             MalformedCookieException
 	 * @throws URISyntaxException
 	 *             URISyntaxException
 	 */
 	private void sendToO2(final Context context,
-			final ConnectorCommand command, final ArrayList<Cookie> cookies,
-			final String htmlText) throws IOException,
-			MalformedCookieException, URISyntaxException {
+			final ConnectorCommand command, final String htmlText)
+			throws IOException {
 		ArrayList<BasicNameValuePair> postData = // .
 		new ArrayList<BasicNameValuePair>();
 		postData.add(new BasicNameValuePair("SMSTo", Utils
@@ -441,7 +417,7 @@ public class ConnectorO2 extends Connector {
 		}
 		st = null;
 
-		HttpResponse response = Utils.getHttpClient(url, cookies, postData,
+		HttpResponse response = Utils.getHttpClient(url, null, postData,
 				TARGET_AGENT, URL_PRESEND, TRUSTALL);
 		postData = null;
 		int resp = response.getStatusLine().getStatusCode();
@@ -501,15 +477,13 @@ public class ConnectorO2 extends Connector {
 				cookies.clear();
 				Log.d(TAG, "init session");
 				// pre-login
-				response = Utils.getHttpClient(URL_PRELOGIN, cookies, null,
+				response = Utils.getHttpClient(URL_PRELOGIN, null, null,
 						TARGET_AGENT, null, TRUSTALL);
 				resp = response.getStatusLine().getStatusCode();
 				if (resp != HttpURLConnection.HTTP_OK) {
 					throw new WebSMSException(context, R.string.error_http, ""
 							+ resp);
 				}
-				Utils.updateCookies(cookies, response.getAllHeaders(),
-						URL_PRELOGIN);
 				String htmlText = Utils.stream2str(response.getEntity()
 						.getContent(), 0, Utils.ONLY_MATCHING_LINE, CHECK_FLOW);
 				final String flowExecutionKey = ConnectorO2
@@ -517,12 +491,12 @@ public class ConnectorO2 extends Connector {
 				htmlText = null;
 
 				// login
-				if (!this.login(context, command, cookies, flowExecutionKey)) {
+				if (!this.login(context, command, flowExecutionKey)) {
 					throw new WebSMSException(context, R.string.error);
 				}
 
 				// sms-center
-				response = Utils.getHttpClient(URL_SMSCENTER, cookies, null,
+				response = Utils.getHttpClient(URL_SMSCENTER, null, null,
 						TARGET_AGENT, URL_LOGIN, TRUSTALL);
 				resp = response.getStatusLine().getStatusCode();
 				if (resp != HttpURLConnection.HTTP_OK) {
@@ -534,8 +508,6 @@ public class ConnectorO2 extends Connector {
 					throw new WebSMSException(context, R.string.error_http, ""
 							+ resp);
 				}
-				Utils.updateCookies(cookies, response.getAllHeaders(),
-						URL_SMSCENTER);
 			}
 
 			// pre-send
@@ -551,7 +523,6 @@ public class ConnectorO2 extends Connector {
 				throw new WebSMSException(context, R.string.error_http, ""
 						+ resp);
 			}
-			Utils.updateCookies(cookies, response.getAllHeaders(), URL_PRESEND);
 			String htmlText = null;
 			if (PreferenceManager.getDefaultSharedPreferences(context)
 					.getBoolean(Preferences.PREFS_TWEAK, false)) {
@@ -566,7 +537,8 @@ public class ConnectorO2 extends Connector {
 					this.sendData(context, command, false);
 					return;
 				} else {
-					throw new WebSMSException(context, R.string.missing_freesms);
+					throw new WebSMSException(context, // .
+							R.string.missing_freesms);
 				}
 			}
 			int i = htmlText.indexOf(CHECK_FREESMS);
@@ -583,7 +555,8 @@ public class ConnectorO2 extends Connector {
 					return;
 				} else {
 					Log.d(TAG, htmlText);
-					throw new WebSMSException(context, R.string.missing_freesms);
+					throw new WebSMSException(context, // .
+							R.string.missing_freesms);
 				}
 			} else {
 				Log.d(TAG, htmlText);
@@ -593,20 +566,14 @@ public class ConnectorO2 extends Connector {
 			// send
 			final String text = command.getText();
 			if (text != null && text.length() > 0) {
-				this.sendToO2(context, command, cookies, htmlText);
+				this.sendToO2(context, command, htmlText);
 			}
 			htmlText = null;
 		} catch (IOException e) {
 			Log.e(TAG, null, e);
 			throw new WebSMSException(e.toString());
-		} catch (URISyntaxException e) {
-			Log.e(TAG, null, e);
-			throw new WebSMSException(e.toString());
-		} catch (MalformedCookieException e) {
-			Log.e(TAG, null, e);
-			throw new WebSMSException(e.toString());
 		}
-		staticCookies = cookies;
+		staticCookies = Utils.getCookies();
 	}
 
 	/**
