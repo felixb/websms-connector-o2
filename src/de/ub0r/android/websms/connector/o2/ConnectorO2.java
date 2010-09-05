@@ -51,9 +51,6 @@ public class ConnectorO2 extends Connector {
 	/** Tag for output. */
 	private static final String TAG = "o2";
 
-	/** Trust all SSL certs. */
-	private static final boolean TRUSTALL = true;
-
 	/** Custom Dateformater. */
 	private static final String DATEFORMAT = "yyyy,MM,dd,kk,mm,00";
 
@@ -126,6 +123,11 @@ public class ConnectorO2 extends Connector {
 	private static final Object CAPTCHA_SYNC = new Object();
 	/** Timeout for entering the captcha. */
 	private static final long CAPTCHA_TIMEOUT = 60000;
+
+	/** The current fingerprints of the SSL-certificate used by the https-sites */
+	private static final String[] O2_SSL_FINGERPRINTS = //
+	{ "2c:b4:86:a8:da:87:77:3f:e4:b2:9d:26:6e:11:9e:00:3d:db:85:55",
+      "a6:da:fd:d3:da:4e:29:95:3d:b3:cd:69:49:8f:d1:e7:0e:e5:fa:c7" };
 
 	/** Static cookies. */
 	private static ArrayList<Cookie> staticCookies = new ArrayList<Cookie>();
@@ -203,7 +205,7 @@ public class ConnectorO2 extends Connector {
 	private boolean solveCaptcha(final Context context, final String flow)
 			throws IOException {
 		HttpResponse response = Utils.getHttpClient(URL_CAPTCHA, null, null,
-				TARGET_AGENT, URL_LOGIN, TRUSTALL);
+				TARGET_AGENT, URL_LOGIN, O2_SSL_FINGERPRINTS);
 		int resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
 			throw new WebSMSException(context, R.string.error_http, "" + resp);
@@ -234,7 +236,7 @@ public class ConnectorO2 extends Connector {
 		postData.add(new BasicNameValuePair("_eventId", "submit"));
 		postData.add(new BasicNameValuePair("riddleValue", captchaSolve));
 		response = Utils.getHttpClient(URL_SOLVECAPTCHA, null, postData,
-				TARGET_AGENT, URL_LOGIN, TRUSTALL);
+				TARGET_AGENT, URL_LOGIN, O2_SSL_FINGERPRINTS);
 		Log.d(TAG, postData.toString());
 		resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
@@ -278,7 +280,7 @@ public class ConnectorO2 extends Connector {
 		postData.add(new BasicNameValuePair("_eventId", "login"));
 		int ccount = Utils.getCookieCount();
 		HttpResponse response = Utils.getHttpClient(URL_LOGIN, null, postData,
-				TARGET_AGENT, URL_PRELOGIN, TRUSTALL);
+				TARGET_AGENT, URL_PRELOGIN, O2_SSL_FINGERPRINTS);
 		int resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
 			throw new WebSMSException(context, R.string.error_http, "" + resp);
@@ -418,7 +420,7 @@ public class ConnectorO2 extends Connector {
 		st = null;
 
 		HttpResponse response = Utils.getHttpClient(url, null, postData,
-				TARGET_AGENT, URL_PRESEND, TRUSTALL);
+				TARGET_AGENT, URL_PRESEND, O2_SSL_FINGERPRINTS);
 		postData = null;
 		int resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
@@ -478,7 +480,7 @@ public class ConnectorO2 extends Connector {
 				Log.d(TAG, "init session");
 				// pre-login
 				response = Utils.getHttpClient(URL_PRELOGIN, null, null,
-						TARGET_AGENT, null, TRUSTALL);
+						TARGET_AGENT, null, O2_SSL_FINGERPRINTS);
 				resp = response.getStatusLine().getStatusCode();
 				if (resp != HttpURLConnection.HTTP_OK) {
 					throw new WebSMSException(context, R.string.error_http, ""
@@ -497,7 +499,7 @@ public class ConnectorO2 extends Connector {
 
 				// sms-center
 				response = Utils.getHttpClient(URL_SMSCENTER, null, null,
-						TARGET_AGENT, URL_LOGIN, TRUSTALL);
+						TARGET_AGENT, URL_LOGIN, O2_SSL_FINGERPRINTS);
 				resp = response.getStatusLine().getStatusCode();
 				if (resp != HttpURLConnection.HTTP_OK) {
 					if (reuseSession) {
@@ -512,7 +514,7 @@ public class ConnectorO2 extends Connector {
 
 			// pre-send
 			response = Utils.getHttpClient(URL_PRESEND, cookies, null,
-					TARGET_AGENT, URL_SMSCENTER, TRUSTALL);
+					TARGET_AGENT, URL_SMSCENTER, O2_SSL_FINGERPRINTS);
 			resp = response.getStatusLine().getStatusCode();
 			if (resp != HttpURLConnection.HTTP_OK) {
 				if (reuseSession) {
