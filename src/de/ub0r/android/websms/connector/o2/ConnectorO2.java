@@ -124,10 +124,12 @@ public class ConnectorO2 extends Connector {
 	/** Timeout for entering the captcha. */
 	private static final long CAPTCHA_TIMEOUT = 60000;
 
-	/** The current fingerprints of the SSL-certificate used by the https-sites */
+	/**
+	 * The current fingerprints of the SSL-certificate used by the https-sites.
+	 */
 	private static final String[] O2_SSL_FINGERPRINTS = //
 	{ "2c:b4:86:a8:da:87:77:3f:e4:b2:9d:26:6e:11:9e:00:3d:db:85:55",
-      "a6:da:fd:d3:da:4e:29:95:3d:b3:cd:69:49:8f:d1:e7:0e:e5:fa:c7" };
+			"a6:da:fd:d3:da:4e:29:95:3d:b3:cd:69:49:8f:d1:e7:0e:e5:fa:c7" };
 
 	/** Static cookies. */
 	private static ArrayList<Cookie> staticCookies = new ArrayList<Cookie>();
