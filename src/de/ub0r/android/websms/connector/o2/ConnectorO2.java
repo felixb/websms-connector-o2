@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.cookie.Cookie;
 import org.apache.http.message.BasicNameValuePair;
 
 import android.content.Context;
@@ -130,9 +129,6 @@ public class ConnectorO2 extends Connector {
 	private static final String[] O2_SSL_FINGERPRINTS = //
 	{ "2c:b4:86:a8:da:87:77:3f:e4:b2:9d:26:6e:11:9e:00:3d:db:85:55",
 			"a6:da:fd:d3:da:4e:29:95:3d:b3:cd:69:49:8f:d1:e7:0e:e5:fa:c7" };
-
-	/** Static cookies. */
-	private static ArrayList<Cookie> staticCookies = new ArrayList<Cookie>();
 
 	/**
 	 * {@inheritDoc}
@@ -288,6 +284,8 @@ public class ConnectorO2 extends Connector {
 			throw new WebSMSException(context, R.string.error_http, "" + resp);
 		}
 		if (ccount == Utils.getCookieCount()) {
+			Log.i(TAG, "cooie count: " + ccount);
+			Log.d(TAG, Utils.getCookiesAsString());
 			String htmlText = null;
 			if (PreferenceManager.getDefaultSharedPreferences(context)
 					.getBoolean(Preferences.PREFS_TWEAK, false)) {
@@ -305,6 +303,7 @@ public class ConnectorO2 extends Connector {
 							R.string.error_wrongcaptcha);
 				}
 			} else {
+				Log.d(TAG, htmlText);
 				throw new WebSMSException(context, R.string.error_pw);
 			}
 		}
@@ -461,24 +460,20 @@ public class ConnectorO2 extends Connector {
 	 * @param reuseSession
 	 *            try to reuse existing session
 	 */
-	@SuppressWarnings("unchecked")
 	private void sendData(final Context context,
 			final ConnectorCommand command, final boolean reuseSession) {
 		Log.d(TAG, "sendData(" + reuseSession + ")");
-		ArrayList<Cookie> cookies;
-		if (staticCookies == null) {
-			cookies = new ArrayList<Cookie>();
-		} else {
-			cookies = (ArrayList<Cookie>) staticCookies.clone();
-		}
+
 		// do IO
 		try {
 			// get Connection
 			HttpResponse response;
 			int resp;
-			if (!reuseSession || cookies.size() == 0) {
+			if (!reuseSession) {
 				// clear session data
-				cookies.clear();
+				Utils.clearCookies();
+			}
+			if (Utils.getCookieCount() == 0) {
 				Log.d(TAG, "init session");
 				// pre-login
 				response = Utils.getHttpClient(URL_PRELOGIN, null, null,
@@ -515,7 +510,7 @@ public class ConnectorO2 extends Connector {
 			}
 
 			// pre-send
-			response = Utils.getHttpClient(URL_PRESEND, cookies, null,
+			response = Utils.getHttpClient(URL_PRESEND, null, null,
 					TARGET_AGENT, URL_SMSCENTER, O2_SSL_FINGERPRINTS);
 			resp = response.getStatusLine().getStatusCode();
 			if (resp != HttpURLConnection.HTTP_OK) {
@@ -577,7 +572,6 @@ public class ConnectorO2 extends Connector {
 			Log.e(TAG, null, e);
 			throw new WebSMSException(e.toString());
 		}
-		staticCookies = Utils.getCookies();
 	}
 
 	/**
