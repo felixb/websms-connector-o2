@@ -20,7 +20,6 @@ package de.ub0r.android.websms.connector.o2;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -49,6 +48,9 @@ import de.ub0r.android.websms.connector.common.ConnectorSpec.SubConnectorSpec;
 public class ConnectorO2 extends Connector {
 	/** Tag for output. */
 	private static final String TAG = "o2";
+
+	/** Used encoding. */
+	private static final String ENCODING = "ISO-8859-15";
 
 	/** Custom Dateformater. */
 	private static final String DATEFORMAT = "yyyy,MM,dd,kk,mm,00";
@@ -203,7 +205,7 @@ public class ConnectorO2 extends Connector {
 	private boolean solveCaptcha(final Context context, final String flow)
 			throws IOException {
 		HttpResponse response = Utils.getHttpClient(URL_CAPTCHA, null, null,
-				TARGET_AGENT, URL_LOGIN, O2_SSL_FINGERPRINTS);
+				TARGET_AGENT, URL_LOGIN, ENCODING, O2_SSL_FINGERPRINTS);
 		int resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
 			throw new WebSMSException(context, R.string.error_http, "" + resp);
@@ -234,7 +236,7 @@ public class ConnectorO2 extends Connector {
 		postData.add(new BasicNameValuePair("_eventId", "submit"));
 		postData.add(new BasicNameValuePair("riddleValue", captchaSolve));
 		response = Utils.getHttpClient(URL_SOLVECAPTCHA, null, postData,
-				TARGET_AGENT, URL_LOGIN, O2_SSL_FINGERPRINTS);
+				TARGET_AGENT, URL_LOGIN, ENCODING, O2_SSL_FINGERPRINTS);
 		Log.d(TAG, postData.toString());
 		resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
@@ -278,7 +280,7 @@ public class ConnectorO2 extends Connector {
 		postData.add(new BasicNameValuePair("_eventId", "login"));
 		int ccount = Utils.getCookieCount();
 		HttpResponse response = Utils.getHttpClient(URL_LOGIN, null, postData,
-				TARGET_AGENT, URL_PRELOGIN, O2_SSL_FINGERPRINTS);
+				TARGET_AGENT, URL_PRELOGIN, ENCODING, O2_SSL_FINGERPRINTS);
 		int resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
 			throw new WebSMSException(context, R.string.error_http, "" + resp);
@@ -342,8 +344,6 @@ public class ConnectorO2 extends Connector {
 	 *            html source of previous site
 	 * @throws IOException
 	 *             IOException
-	 * @throws URISyntaxException
-	 *             URISyntaxException
 	 */
 	private void sendToO2(final Context context,
 			final ConnectorCommand command, final String htmlText)
@@ -421,7 +421,7 @@ public class ConnectorO2 extends Connector {
 		st = null;
 
 		HttpResponse response = Utils.getHttpClient(url, null, postData,
-				TARGET_AGENT, URL_PRESEND, O2_SSL_FINGERPRINTS);
+				TARGET_AGENT, URL_PRESEND, ENCODING, O2_SSL_FINGERPRINTS);
 		postData = null;
 		int resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
@@ -477,7 +477,7 @@ public class ConnectorO2 extends Connector {
 				Log.d(TAG, "init session");
 				// pre-login
 				response = Utils.getHttpClient(URL_PRELOGIN, null, null,
-						TARGET_AGENT, null, O2_SSL_FINGERPRINTS);
+						TARGET_AGENT, null, ENCODING, O2_SSL_FINGERPRINTS);
 				resp = response.getStatusLine().getStatusCode();
 				if (resp != HttpURLConnection.HTTP_OK) {
 					throw new WebSMSException(context, R.string.error_http, ""
@@ -496,7 +496,7 @@ public class ConnectorO2 extends Connector {
 
 				// sms-center
 				response = Utils.getHttpClient(URL_SMSCENTER, null, null,
-						TARGET_AGENT, URL_LOGIN, O2_SSL_FINGERPRINTS);
+						TARGET_AGENT, URL_LOGIN, ENCODING, O2_SSL_FINGERPRINTS);
 				resp = response.getStatusLine().getStatusCode();
 				if (resp != HttpURLConnection.HTTP_OK) {
 					if (reuseSession) {
@@ -511,7 +511,7 @@ public class ConnectorO2 extends Connector {
 
 			// pre-send
 			response = Utils.getHttpClient(URL_PRESEND, null, null,
-					TARGET_AGENT, URL_SMSCENTER, O2_SSL_FINGERPRINTS);
+					TARGET_AGENT, URL_SMSCENTER, ENCODING, O2_SSL_FINGERPRINTS);
 			resp = response.getStatusLine().getStatusCode();
 			if (resp != HttpURLConnection.HTTP_OK) {
 				if (reuseSession) {
