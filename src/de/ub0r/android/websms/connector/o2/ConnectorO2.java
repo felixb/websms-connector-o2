@@ -272,7 +272,7 @@ public class ConnectorO2 extends Connector {
 		postData.add(new BasicNameValuePair("_flowExecutionKey", flow));
 		postData.add(new BasicNameValuePair("loginName", Utils
 				.international2national(command.getDefPrefix(), Utils
-						.getSender(context, command.getDefSender()))));
+						.getSenderNumber(context, command.getDefSender()))));
 		final SharedPreferences p = PreferenceManager
 				.getDefaultSharedPreferences(context);
 		postData.add(new BasicNameValuePair("password", p.getString(
@@ -354,7 +354,15 @@ public class ConnectorO2 extends Connector {
 				.national2international(command.getDefPrefix(), Utils
 						.getRecipientsNumber(command.getRecipients()[0]))));
 		postData.add(new BasicNameValuePair("SMSText", command.getText()));
-		final String customSender = command.getCustomSender();
+		String customSender = command.getCustomSender();
+		if (customSender == null) {
+			final String sn = Utils.getSenderNumber(context, command
+					.getDefSender());
+			final String s = Utils.getSender(context, command.getDefSender());
+			if (s != null && !s.equals(sn)) {
+				customSender = s;
+			}
+		}
 		if (customSender != null) {
 			postData.add(new BasicNameValuePair("SMSFrom", customSender));
 			if (customSender.length() == 0) {
