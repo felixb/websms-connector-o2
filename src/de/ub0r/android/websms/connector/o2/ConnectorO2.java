@@ -467,59 +467,45 @@ public class ConnectorO2 extends Connector {
 	 *            {@link ConnectorCommand}
 	 * @param reuseSession
 	 *            try to reuse existing session
+	 * @throws IOException
+	 *             IOException
 	 */
 	private void sendData(final Context context,
-			final ConnectorCommand command, final boolean reuseSession) {
+			final ConnectorCommand command, final boolean reuseSession)
+			throws IOException {
 		Log.d(TAG, "sendData(" + reuseSession + ")");
 
-		// do IO
-		try {
-			// get Connection
-			HttpResponse response;
-			int resp;
-			if (!reuseSession) {
-				// clear session data
-				Utils.clearCookies();
+		// get Connection
+		HttpResponse response;
+		int resp;
+		if (!reuseSession) {
+			// clear session data
+			Utils.clearCookies();
+		}
+		if (Utils.getCookieCount() == 0) {
+			Log.d(TAG, "init session");
+			// pre-login
+			response = Utils.getHttpClient(URL_PRELOGIN, null, null,
+					TARGET_AGENT, null, ENCODING, O2_SSL_FINGERPRINTS);
+			resp = response.getStatusLine().getStatusCode();
+			if (resp != HttpURLConnection.HTTP_OK) {
+				throw new WebSMSException(context, R.string.error_http, ""
+						+ resp);
 			}
-			if (Utils.getCookieCount() == 0) {
-				Log.d(TAG, "init session");
-				// pre-login
-				response = Utils.getHttpClient(URL_PRELOGIN, null, null,
-						TARGET_AGENT, null, ENCODING, O2_SSL_FINGERPRINTS);
-				resp = response.getStatusLine().getStatusCode();
-				if (resp != HttpURLConnection.HTTP_OK) {
-					throw new WebSMSException(context, R.string.error_http, ""
-							+ resp);
-				}
-				String htmlText = Utils.stream2str(response.getEntity()
-						.getContent(), 0, Utils.ONLY_MATCHING_LINE, CHECK_FLOW);
-				final String flowExecutionKey = ConnectorO2
-						.getFlowExecutionkey(htmlText);
-				htmlText = null;
+			String htmlText = Utils.stream2str(response.getEntity()
+					.getContent(), 0, Utils.ONLY_MATCHING_LINE, CHECK_FLOW);
+			final String flowExecutionKey = ConnectorO2
+					.getFlowExecutionkey(htmlText);
+			htmlText = null;
 
-				// login
-				if (!this.login(context, command, flowExecutionKey)) {
-					throw new WebSMSException(context, R.string.error);
-				}
-
-				// sms-center
-				response = Utils.getHttpClient(URL_SMSCENTER, null, null,
-						TARGET_AGENT, URL_LOGIN, ENCODING, O2_SSL_FINGERPRINTS);
-				resp = response.getStatusLine().getStatusCode();
-				if (resp != HttpURLConnection.HTTP_OK) {
-					if (reuseSession) {
-						// try again with clear session
-						this.sendData(context, command, false);
-						return;
-					}
-					throw new WebSMSException(context, R.string.error_http, ""
-							+ resp);
-				}
+			// login
+			if (!this.login(context, command, flowExecutionKey)) {
+				throw new WebSMSException(context, R.string.error);
 			}
 
-			// pre-send
-			response = Utils.getHttpClient(URL_PRESEND, null, null,
-					TARGET_AGENT, URL_SMSCENTER, ENCODING, O2_SSL_FINGERPRINTS);
+			// sms-center
+			response = Utils.getHttpClient(URL_SMSCENTER, null, null,
+					TARGET_AGENT, URL_LOGIN, ENCODING, O2_SSL_FINGERPRINTS);
 			resp = response.getStatusLine().getStatusCode();
 			if (resp != HttpURLConnection.HTTP_OK) {
 				if (reuseSession) {
@@ -530,63 +516,75 @@ public class ConnectorO2 extends Connector {
 				throw new WebSMSException(context, R.string.error_http, ""
 						+ resp);
 			}
-			String htmlText = null;
-			if (PreferenceManager.getDefaultSharedPreferences(context)
-					.getBoolean(Preferences.PREFS_TWEAK, false)) {
-				htmlText = Utils.stream2str(response.getEntity().getContent(),
-						STRIP_PRESEND_START, STRIP_PRESEND_END, CHECK_FREESMS);
+		}
+
+		// pre-send
+		response = Utils.getHttpClient(URL_PRESEND, null, null, TARGET_AGENT,
+				URL_SMSCENTER, ENCODING, O2_SSL_FINGERPRINTS);
+		resp = response.getStatusLine().getStatusCode();
+		if (resp != HttpURLConnection.HTTP_OK) {
+			if (reuseSession) {
+				// try again with clear session
+				this.sendData(context, command, false);
+				return;
+			}
+			throw new WebSMSException(context, R.string.error_http, "" + resp);
+		}
+		String htmlText = null;
+		if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+				Preferences.PREFS_TWEAK, false)) {
+			htmlText = Utils.stream2str(response.getEntity().getContent(),
+					STRIP_PRESEND_START, STRIP_PRESEND_END, CHECK_FREESMS);
+		} else {
+			htmlText = Utils.stream2str(response.getEntity().getContent(), 0,
+					-1, CHECK_FREESMS);
+		}
+		if (htmlText == null) {
+			if (reuseSession) {
+				this.sendData(context, command, false);
+				return;
 			} else {
-				htmlText = Utils.stream2str(response.getEntity().getContent(),
-						0, -1, CHECK_FREESMS);
+				throw new WebSMSException(context, // .
+						R.string.missing_freesms);
 			}
-			if (htmlText == null) {
-				if (reuseSession) {
-					this.sendData(context, command, false);
-					return;
-				} else {
-					throw new WebSMSException(context, // .
-							R.string.missing_freesms);
-				}
-			}
-			int i = htmlText.indexOf(CHECK_FREESMS);
-			if (i > 0) {
-				int j = htmlText.indexOf(CHECK_WEB2SMS, i);
-				if (j > 0) {
-					ConnectorSpec c = this.getSpec(context);
-					c.setBalance(htmlText.substring(i + 9, j).trim().split(" ",
-							2)[0]);
-					Log.d(TAG, "balance: " + c.getBalance());
-				} else if (reuseSession) {
-					// try again with clear session
-					this.sendData(context, command, false);
-					return;
-				} else {
-					Log.d(TAG, htmlText);
-					throw new WebSMSException(context, // .
-							R.string.missing_freesms);
-				}
+		}
+		int i = htmlText.indexOf(CHECK_FREESMS);
+		if (i > 0) {
+			int j = htmlText.indexOf(CHECK_WEB2SMS, i);
+			if (j > 0) {
+				ConnectorSpec c = this.getSpec(context);
+				c
+						.setBalance(htmlText.substring(i + 9, j).trim().split(
+								" ", 2)[0]);
+				Log.d(TAG, "balance: " + c.getBalance());
+			} else if (reuseSession) {
+				// try again with clear session
+				this.sendData(context, command, false);
+				return;
 			} else {
 				Log.d(TAG, htmlText);
-				throw new WebSMSException(context, R.string.missing_freesms);
+				throw new WebSMSException(context, // .
+						R.string.missing_freesms);
 			}
-
-			// send
-			final String text = command.getText();
-			if (text != null && text.length() > 0) {
-				this.sendToO2(context, command, htmlText);
-			}
-			htmlText = null;
-		} catch (IOException e) {
-			Log.e(TAG, null, e);
-			throw new WebSMSException(e.toString());
+		} else {
+			Log.d(TAG, htmlText);
+			throw new WebSMSException(context, R.string.missing_freesms);
 		}
+
+		// send
+		final String text = command.getText();
+		if (text != null && text.length() > 0) {
+			this.sendToO2(context, command, htmlText);
+		}
+		htmlText = null;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected final void doUpdate(final Context context, final Intent intent) {
+	protected final void doUpdate(final Context context, final Intent intent)
+			throws IOException {
 		this.sendData(context, new ConnectorCommand(intent), true);
 	}
 
@@ -594,7 +592,8 @@ public class ConnectorO2 extends Connector {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected final void doSend(final Context context, final Intent intent) {
+	protected final void doSend(final Context context, final Intent intent)
+			throws IOException {
 		this.sendData(context, new ConnectorCommand(intent), true);
 	}
 
