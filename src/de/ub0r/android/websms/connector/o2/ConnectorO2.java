@@ -143,12 +143,14 @@ public class ConnectorO2 extends Connector {
 		c.setBalance(null);
 		c.setCapabilities(ConnectorSpec.CAPABILITIES_UPDATE
 				| ConnectorSpec.CAPABILITIES_SEND
-				| ConnectorSpec.CAPABILITIES_PREFS);
+				| ConnectorSpec.CAPABILITIES_PREFS
+				| ConnectorSpec.CAPABILITIES_CHARACTER_CHECK);
 		c.addSubConnector("o2", c.getName(),
 				SubConnectorSpec.FEATURE_CUSTOMSENDER
 						| SubConnectorSpec.FEATURE_SENDLATER
 						| SubConnectorSpec.FEATURE_SENDLATER_QUARTERS
 						| SubConnectorSpec.FEATURE_FLASHSMS);
+		c.setValidCharacters(CharacterTable.getValidCharacters());
 		return c;
 	}
 
@@ -353,7 +355,8 @@ public class ConnectorO2 extends Connector {
 		postData.add(new BasicNameValuePair("SMSTo", Utils
 				.national2international(command.getDefPrefix(), Utils
 						.getRecipientsNumber(command.getRecipients()[0]))));
-		postData.add(new BasicNameValuePair("SMSText", command.getText()));
+		postData.add(new BasicNameValuePair("SMSText", CharacterTable
+				.encodeString(command.getText())));
 		String customSender = command.getCustomSender();
 		if (customSender == null) {
 			final String sn = Utils.getSenderNumber(context, command
