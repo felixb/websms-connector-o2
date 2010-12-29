@@ -48,6 +48,14 @@ final class CharacterTable {
 		}
 		MAP.put("\r", "");
 		MAP.put("\u00F7", "%"); // ÷
+		MAP.put("\u0130", "I"); // İ
+		MAP.put("\u0131", "i"); // ı
+		MAP.put("\u015E", "S"); // Ş
+		MAP.put("\u015F", "s"); // ş
+		MAP.put("\u00C7", "C"); // Ç
+		MAP.put("\u00E7", "c"); // ç
+		MAP.put("\u011E", "G"); // Ğ
+		MAP.put("\u011F", "g"); // ğ
 
 		String[] arr = MAP.keySet().toArray(new String[0]);
 		StringBuffer strb = new StringBuffer(MAP.size());
