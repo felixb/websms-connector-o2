@@ -30,6 +30,16 @@ final class CharacterTable {
 		MAP.put("\u011E", "G"); // Ğ
 		MAP.put("\u011F", "g"); // ğ
 
+		MAP.put("\u0104", "A"); // Ą
+		MAP.put("\u0106", "C"); // Ć
+		MAP.put("\u0118", "E"); // Ę
+		MAP.put("\u0141", "L"); // Ł
+		MAP.put("\u0143", "N"); // Ń
+		MAP.put("\u00D3", "O"); // Ó
+		MAP.put("\u015A", "S"); // Ś
+		MAP.put("\u0179", "Z"); // Ź
+		MAP.put("\u017B", "Z"); // Ż
+
 		String[] arr = MAP.keySet().toArray(new String[0]);
 		StringBuffer strb = new StringBuffer(MAP.size());
 		for (String vc : arr) {
