@@ -49,6 +49,9 @@ public class ConnectorO2 extends Connector {
 	/** Tag for output. */
 	private static final String TAG = "o2";
 
+	/** Google's ad unit id. */
+	private static final String AD_UNITID = "a14dd555326b466";
+
 	/** Used encoding. */
 	private static final String ENCODING = "ISO-8859-15";
 
@@ -141,11 +144,12 @@ public class ConnectorO2 extends Connector {
 		final String name = context.getString(R.string.connector_o2_name);
 		ConnectorSpec c = new ConnectorSpec(name);
 		c.setAuthor(context.getString(R.string.connector_o2_author));
+		c.setAdUnitId(AD_UNITID);
 		c.setBalance(null);
 		c.setCapabilities(ConnectorSpec.CAPABILITIES_UPDATE
 				| ConnectorSpec.CAPABILITIES_SEND
 				| ConnectorSpec.CAPABILITIES_PREFS);
-		c.addSubConnector("o2", c.getName(),
+		c.addSubConnector(TAG, c.getName(),
 				SubConnectorSpec.FEATURE_CUSTOMSENDER
 						| SubConnectorSpec.FEATURE_SENDLATER
 						| SubConnectorSpec.FEATURE_SENDLATER_QUARTERS
