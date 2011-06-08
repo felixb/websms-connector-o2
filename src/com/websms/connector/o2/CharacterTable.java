@@ -1,4 +1,4 @@
-package de.ub0r.android.websms.connector.o2;
+package com.websms.connector.o2;
 
 import java.util.HashMap;
 import java.util.Map;

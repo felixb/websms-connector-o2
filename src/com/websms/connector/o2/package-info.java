@@ -23,5 +23,5 @@
  * @version 3.0
  * @author flx
  */
-package de.ub0r.android.websms.connector.o2;
+package com.websms.connector.o2;
 

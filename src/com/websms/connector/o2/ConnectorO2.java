@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along with
  * this program; If not, see <http://www.gnu.org/licenses/>.
  */
-package de.ub0r.android.websms.connector.o2;
+package com.websms.connector.o2;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -131,10 +131,13 @@ public class ConnectorO2 extends Connector {
 	/**
 	 * The current fingerprints of the SSL-certificate used by the https-sites.
 	 */
-	private static final String[] O2_SSL_FINGERPRINTS = //
-	{ "2c:b4:86:a8:da:87:77:3f:e4:b2:9d:26:6e:11:9e:00:3d:db:85:55",
+	private static final String[] O2_SSL_FINGERPRINTS = {
+			"2c:b4:86:a8:da:87:77:3f:e4:b2:9d:26:6e:11:9e:00:3d:db:85:55",
 			"a6:da:fd:d3:da:4e:29:95:3d:b3:cd:69:49:8f:d1:e7:0e:e5:fa:c7",
 			"b0:36:f6:fd:0b:6f:28:75:ca:3b:5d:4a:91:07:ce:db:d0:0d:71:b0" };
+
+	/** (Setting) Ignore invalid SSL certificates */
+	protected boolean mIgnoreCerts = false;
 
 	/**
 	 * {@inheritDoc}
@@ -174,6 +177,9 @@ public class ConnectorO2 extends Connector {
 		} else {
 			connectorSpec.setStatus(ConnectorSpec.STATUS_INACTIVE);
 		}
+
+		this.mIgnoreCerts = p.getBoolean(Preferences.PREFS_IGNORE_CERTS, false);
+
 		return connectorSpec;
 	}
 
@@ -209,8 +215,8 @@ public class ConnectorO2 extends Connector {
 	 */
 	private boolean solveCaptcha(final Context context, final String flow)
 			throws IOException {
-		HttpResponse response = Utils.getHttpClient(URL_CAPTCHA, null, null,
-				TARGET_AGENT, URL_LOGIN, ENCODING, O2_SSL_FINGERPRINTS);
+		HttpResponse response = this.getHttpClient(context, URL_CAPTCHA, null,
+				URL_LOGIN);
 		int resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
 			throw new WebSMSException(context, R.string.error_http, "" + resp);
@@ -240,8 +246,8 @@ public class ConnectorO2 extends Connector {
 		postData.add(new BasicNameValuePair("_flowExecutionKey", flow));
 		postData.add(new BasicNameValuePair("_eventId", "submit"));
 		postData.add(new BasicNameValuePair("riddleValue", captchaSolve));
-		response = Utils.getHttpClient(URL_SOLVECAPTCHA, null, postData,
-				TARGET_AGENT, URL_LOGIN, ENCODING, O2_SSL_FINGERPRINTS);
+		response = this.getHttpClient(context, URL_SOLVECAPTCHA, postData,
+				URL_LOGIN);
 		Log.d(TAG, postData.toString());
 		resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
@@ -284,8 +290,8 @@ public class ConnectorO2 extends Connector {
 				Preferences.PREFS_PASSWORD, "")));
 		postData.add(new BasicNameValuePair("_eventId", "login"));
 		int ccount = Utils.getCookieCount();
-		HttpResponse response = Utils.getHttpClient(URL_LOGIN, null, postData,
-				TARGET_AGENT, URL_PRELOGIN, ENCODING, O2_SSL_FINGERPRINTS);
+		HttpResponse response = this.getHttpClient(context, URL_LOGIN,
+				postData, URL_PRELOGIN);
 		int resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
 			throw new WebSMSException(context, R.string.error_http, "" + resp);
@@ -434,8 +440,8 @@ public class ConnectorO2 extends Connector {
 		}
 		st = null;
 
-		HttpResponse response = Utils.getHttpClient(url, null, postData,
-				TARGET_AGENT, URL_PRESEND, ENCODING, O2_SSL_FINGERPRINTS);
+		HttpResponse response = this.getHttpClient(context, url, postData,
+				URL_PRESEND);
 		postData = null;
 		int resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
@@ -491,8 +497,9 @@ public class ConnectorO2 extends Connector {
 		if (Utils.getCookieCount() == 0) {
 			Log.d(TAG, "init session");
 			// pre-login
-			response = Utils.getHttpClient(URL_PRELOGIN, null, null,
-					TARGET_AGENT, null, ENCODING, O2_SSL_FINGERPRINTS);
+
+			response = this.getHttpClient(context, URL_PRELOGIN, null, null);
+
 			resp = response.getStatusLine().getStatusCode();
 			if (resp != HttpURLConnection.HTTP_OK) {
 				throw new WebSMSException(context, R.string.error_http, ""
@@ -510,8 +517,8 @@ public class ConnectorO2 extends Connector {
 			}
 
 			// sms-center
-			response = Utils.getHttpClient(URL_SMSCENTER, null, null,
-					TARGET_AGENT, URL_LOGIN, ENCODING, O2_SSL_FINGERPRINTS);
+			response = this.getHttpClient(context, URL_SMSCENTER, null,
+					URL_LOGIN);
 			resp = response.getStatusLine().getStatusCode();
 			if (resp != HttpURLConnection.HTTP_OK) {
 				if (reuseSession) {
@@ -525,8 +532,8 @@ public class ConnectorO2 extends Connector {
 		}
 
 		// pre-send
-		response = Utils.getHttpClient(URL_PRESEND, null, null, TARGET_AGENT,
-				URL_SMSCENTER, ENCODING, O2_SSL_FINGERPRINTS);
+		response = this
+				.getHttpClient(context, URL_PRESEND, null, URL_SMSCENTER);
 		resp = response.getStatusLine().getStatusCode();
 		if (resp != HttpURLConnection.HTTP_OK) {
 			if (reuseSession) {
@@ -611,6 +618,19 @@ public class ConnectorO2 extends Connector {
 		captchaSolve = solvedCaptcha;
 		synchronized (CAPTCHA_SYNC) {
 			CAPTCHA_SYNC.notify();
+		}
+	}
+
+	protected HttpResponse getHttpClient(final Context context,
+			final String url, final ArrayList<BasicNameValuePair> postData,
+			final String referer) {
+		try {
+			return Utils.getHttpClient(url, null, postData, TARGET_AGENT,
+					referer, ENCODING, this.mIgnoreCerts, O2_SSL_FINGERPRINTS);
+		} catch (javax.net.ssl.SSLException e) {
+			throw new WebSMSException(context, R.string.error_invalid_cert);
+		} catch (IOException e) {
+			throw new WebSMSException(e);
 		}
 	}
 }

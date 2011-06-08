@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along with
  * this program; If not, see <http://www.gnu.org/licenses/>.
  */
-package de.ub0r.android.websms.connector.o2;
+package com.websms.connector.o2;
 
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
@@ -33,6 +33,8 @@ public final class Preferences extends PreferenceActivity {
 	static final String PREFS_PASSWORD = "password_o2";
 	/** Preference's name: tweak site reading. */
 	static final String PREFS_TWEAK = "tweak";
+	/** Ignore invalid SSL certs */
+	static final String PREFS_IGNORE_CERTS = "ignore_invalid_cert";
 
 	/**
 	 * {@inheritDoc}
