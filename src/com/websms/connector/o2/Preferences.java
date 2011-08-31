@@ -31,8 +31,6 @@ public final class Preferences extends PreferenceActivity {
 	static final String PREFS_ENABLED = "enable_o2";
 	/** Preference's name: user's password. */
 	static final String PREFS_PASSWORD = "password_o2";
-	/** Preference's name: tweak site reading. */
-	static final String PREFS_TWEAK = "tweak";
 	/** Ignore invalid SSL certs */
 	static final String PREFS_IGNORE_CERTS = "ignore_invalid_cert";
 

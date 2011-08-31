@@ -23,9 +23,6 @@
 	<EditTextPreference android:key="password_o2"
 		android:title="@string/password_" android:dialogTitle="@string/password_"
 		android:summary="@string/password_o2_hint" android:dependency="enable_o2" android:inputType="textPassword"/>
-	<CheckBoxPreference android:key="tweak"
-		android:title="@string/tweak_" android:summary="@string/tweak_hint"
-		android:dependency="enable_o2" />
 	<CheckBoxPreference android:key="use_default_sender"
 		android:defaultValue="true" android:title="@string/use_derfault_sender_"
 		android:summary="@string/use_derfault_sender_hint"

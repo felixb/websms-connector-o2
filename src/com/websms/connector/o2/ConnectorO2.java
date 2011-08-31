@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Felix Bechstein
+ * Copyright (C) 2010 Felix Bechstein, 2011 Lorenz Bauer
  * 
  * This file is part of WebSMS.
  * 
@@ -35,10 +35,10 @@ import android.text.format.DateFormat;
 import de.ub0r.android.websms.connector.common.Connector;
 import de.ub0r.android.websms.connector.common.ConnectorCommand;
 import de.ub0r.android.websms.connector.common.ConnectorSpec;
+import de.ub0r.android.websms.connector.common.ConnectorSpec.SubConnectorSpec;
 import de.ub0r.android.websms.connector.common.Log;
 import de.ub0r.android.websms.connector.common.Utils;
 import de.ub0r.android.websms.connector.common.WebSMSException;
-import de.ub0r.android.websms.connector.common.ConnectorSpec.SubConnectorSpec;
 
 /**
  * AsyncTask to manage IO to O2 API.
@@ -59,25 +59,16 @@ public class ConnectorO2 extends Connector {
 	private static final String DATEFORMAT = "yyyy,MM,dd,kk,mm,00";
 
 	/** URL before login. */
-	private static final String URL_PRELOGIN = "https://login.o2online.de"
-			+ "/loginRegistration/loginAction.do"
-			+ "?_flowId=login&o2_type=asp&o2_label=login/"
-			+ "comcenter-login&scheme=http&port=80&server=email"
-			+ ".o2online.de&url=%2Fssomanager.osp%3FAPIID%3D"
-			+ "AUTH-WEBSSO%26TargetApp%3D%2Fsmscenter_new.osp"
-			+ "%253f%26o2_type%3Durl%26o2_label%3Dweb2sms-o2online";
+	private static final String URL_PRELOGIN = "https://login.o2online.de/auth/login?scheme=https&port=443&server=email.o2online.de&url=%2Fssomanager.osp%3FAPIID%3DAUTH-WEBSSO";
 	/** URL for login. */
-	private static final String URL_LOGIN = "https://login.o2online.de"
-			+ "/loginRegistration/loginAction.do";
+	private static final String URL_LOGIN = "https://login.o2online.de/auth/login?wicket:interface=:12:loginForm::IFormSubmitListener::";
 	/** URL of captcha. */
 	private static final String URL_CAPTCHA = "https://login.o2online.de"
 			+ "/loginRegistration/jcaptchaReg";
 	/** URL for solving captcha. */
 	private static final String URL_SOLVECAPTCHA = URL_LOGIN;
 	/** URL for sms center. */
-	private static final String URL_SMSCENTER = "http://email.o2online.de:80"
-			+ "/ssomanager.osp?APIID=AUTH-WEBSSO&TargetApp=/smscenter_new.osp"
-			+ "?&o2_type=url&o2_label=web2sms-o2online";
+	private static final String URL_SMSCENTER = "https://email.o2online.de/ssomanager.osp?APIID=AUTH-WEBSSO&TargetApp=/smscenter_new.osp%3f&o2_type=url&o2_label=web2sms-o2online";
 	/** URL before sending. */
 	private static final String URL_PRESEND = "https://email.o2online.de"
 			+ "/smscenter_new.osp?Autocompletion=1&MsgContentID=-1";
@@ -95,26 +86,12 @@ public class ConnectorO2 extends Connector {
 	/** Check if message was sent. */
 	private static final String CHECK_SENT = // .
 	"Ihre SMS wurde erfolgreich versendet.";
-	// private static final String CHECK_SENT = "/app_pic/ico_mail_send_ok.gif";
+
 	/** Check if message was scheduled. */
 	private static final String CHECK_SCHED = "Ihre Web2SMS ist geplant";
 	/** Check if captcha was solved wrong. */
 	private static final String CHECK_WRONGCAPTCHA = // .
 	"Sie haben einen falschen Code eingegeben.";
-	/** Check for _flowExecutionKey. */
-	private static final String CHECK_FLOW = // .
-	"name=\"_flowExecutionKey\" value=\"";
-
-	/** Stip bytes from stream: prelogin. */
-	private static final int STRIP_PRELOGIN_START = 8000;
-	/** Stip bytes from stream: prelogin. */
-	private static final int STRIP_PRELOGIN_END = 11000;
-	/** Stip bytes from stream: presend. */
-	private static final int STRIP_PRESEND_START = 56000;
-	/** Stip bytes from stream: presend. */
-	private static final int STRIP_PRESEND_END = 62000;
-	/** Stip bytes from stream: send. */
-	private static final int STRIP_SEND_START = 2000;
 
 	/** HTTP Useragent. */
 	private static final String TARGET_AGENT = "Mozilla/5.0 (Windows; U;"
@@ -133,7 +110,6 @@ public class ConnectorO2 extends Connector {
 	 */
 	private static final String[] O2_SSL_FINGERPRINTS = {
 			"2c:b4:86:a8:da:87:77:3f:e4:b2:9d:26:6e:11:9e:00:3d:db:85:55",
-			"a6:da:fd:d3:da:4e:29:95:3d:b3:cd:69:49:8f:d1:e7:0e:e5:fa:c7",
 			"b0:36:f6:fd:0b:6f:28:75:ca:3b:5d:4a:91:07:ce:db:d0:0d:71:b0" };
 
 	/** (Setting) Ignore invalid SSL certificates */
@@ -184,37 +160,15 @@ public class ConnectorO2 extends Connector {
 	}
 
 	/**
-	 * Extract _flowExecutionKey from HTML output.
-	 * 
-	 * @param html
-	 *            input
-	 * @return _flowExecutionKey
-	 */
-	private static String getFlowExecutionkey(final String html) {
-		String ret = "";
-		int i = html.indexOf(CHECK_FLOW);
-		if (i > 0) {
-			int j = html.indexOf("\"", i + 35);
-			if (j >= 0) {
-				ret = html.substring(i + 32, j);
-			}
-		}
-		return ret;
-	}
-
-	/**
 	 * Load captcha and wait for user input to solve it.
 	 * 
 	 * @param context
 	 *            {@link Context}
-	 * @param flow
-	 *            _flowExecutionKey
 	 * @return true if captcha was solved
 	 * @throws IOException
 	 *             IOException
 	 */
-	private boolean solveCaptcha(final Context context, final String flow)
-			throws IOException {
+	private boolean solveCaptcha(final Context context) throws IOException {
 		HttpResponse response = this.getHttpClient(context, URL_CAPTCHA, null,
 				URL_LOGIN);
 		int resp = response.getStatusLine().getStatusCode();
@@ -243,7 +197,6 @@ public class ConnectorO2 extends Connector {
 		Log.d(TAG, "got solved captcha: " + captchaSolve);
 		final ArrayList<BasicNameValuePair> postData = // .
 		new ArrayList<BasicNameValuePair>(3);
-		postData.add(new BasicNameValuePair("_flowExecutionKey", flow));
 		postData.add(new BasicNameValuePair("_eventId", "submit"));
 		postData.add(new BasicNameValuePair("riddleValue", captchaSolve));
 		response = this.getHttpClient(context, URL_SOLVECAPTCHA, postData,
@@ -268,27 +221,22 @@ public class ConnectorO2 extends Connector {
 	 *            Context
 	 * @param command
 	 *            ConnectorCommand
-	 * @param flow
-	 *            _flowExecutionKey
 	 * @return true if logged in
 	 * @throws IOException
 	 *             IOException
 	 */
-	private boolean login(final Context context,
-			final ConnectorCommand command, final String flow)
+	private boolean login(final Context context, final ConnectorCommand command)
 			throws IOException {
 		// post data
 		final ArrayList<BasicNameValuePair> postData = // .
-		new ArrayList<BasicNameValuePair>(4);
-		postData.add(new BasicNameValuePair("_flowExecutionKey", flow));
-		postData.add(new BasicNameValuePair("loginName", Utils
-				.international2national(command.getDefPrefix(), Utils
-						.getSenderNumber(context, command.getDefSender()))));
+		new ArrayList<BasicNameValuePair>(2);
+		postData.add(new BasicNameValuePair("loginName:loginName", Utils
+				.international2national(command.getDefPrefix(),
+						Utils.getSenderNumber(context, command.getDefSender()))));
 		final SharedPreferences p = PreferenceManager
 				.getDefaultSharedPreferences(context);
-		postData.add(new BasicNameValuePair("password", p.getString(
+		postData.add(new BasicNameValuePair("password:password", p.getString(
 				Preferences.PREFS_PASSWORD, "")));
-		postData.add(new BasicNameValuePair("_eventId", "login"));
 		int ccount = Utils.getCookieCount();
 		HttpResponse response = this.getHttpClient(context, URL_LOGIN,
 				postData, URL_PRELOGIN);
@@ -297,21 +245,16 @@ public class ConnectorO2 extends Connector {
 			throw new WebSMSException(context, R.string.error_http, "" + resp);
 		}
 		if (ccount == Utils.getCookieCount()) {
-			Log.i(TAG, "cooie count: " + ccount);
+			Log.i(TAG, "cookie count: " + ccount);
 			Log.d(TAG, Utils.getCookiesAsString());
+
 			String htmlText = null;
-			if (PreferenceManager.getDefaultSharedPreferences(context)
-					.getBoolean(Preferences.PREFS_TWEAK, false)) {
-				htmlText = Utils.stream2str(response.getEntity().getContent(),
-						STRIP_PRELOGIN_START, STRIP_PRELOGIN_END);
-			} else {
-				htmlText = Utils.stream2str(response.getEntity().getContent());
-			}
+			htmlText = Utils.stream2str(response.getEntity().getContent());
+
 			response = null;
 			if (htmlText != null && htmlText.indexOf("captcha") > 0) {
-				final String newFlow = getFlowExecutionkey(htmlText);
 				htmlText = null;
-				if (!this.solveCaptcha(context, newFlow)) {
+				if (!this.solveCaptcha(context)) {
 					throw new WebSMSException(context,
 							R.string.error_wrongcaptcha);
 				}
@@ -362,14 +305,14 @@ public class ConnectorO2 extends Connector {
 		ArrayList<BasicNameValuePair> postData = // .
 		new ArrayList<BasicNameValuePair>();
 		postData.add(new BasicNameValuePair("SMSTo", Utils
-				.national2international(command.getDefPrefix(), Utils
-						.getRecipientsNumber(command.getRecipients()[0]))));
+				.national2international(command.getDefPrefix(),
+						Utils.getRecipientsNumber(command.getRecipients()[0]))));
 		postData.add(new BasicNameValuePair("SMSText", CharacterTable
 				.encodeString(command.getText())));
 		String customSender = command.getCustomSender();
 		if (customSender == null) {
-			final String sn = Utils.getSenderNumber(context, command
-					.getDefSender());
+			final String sn = Utils.getSenderNumber(context,
+					command.getDefSender());
 			final String s = Utils.getSender(context, command.getDefSender());
 			if (s != null && !s.equals(sn)) {
 				customSender = s;
@@ -452,15 +395,9 @@ public class ConnectorO2 extends Connector {
 			check = CHECK_SCHED;
 		}
 		String htmlText1 = null;
-		if (sendLater <= 0
-				&& PreferenceManager.getDefaultSharedPreferences(context)
-						.getBoolean(Preferences.PREFS_TWEAK, false)) {
-			htmlText1 = Utils.stream2str(response.getEntity().getContent(),
-					STRIP_SEND_START, Utils.ONLY_MATCHING_LINE, check);
-		} else {
-			htmlText1 = Utils.stream2str(response.getEntity().getContent(), 0,
-					Utils.ONLY_MATCHING_LINE, check);
-		}
+		htmlText1 = Utils.stream2str(response.getEntity().getContent(), 0,
+				Utils.ONLY_MATCHING_LINE, check);
+
 		if (htmlText1 == null) {
 			throw new WebSMSException("error parsing website");
 		} else if (htmlText1.indexOf(check) < 0) {
@@ -505,14 +442,9 @@ public class ConnectorO2 extends Connector {
 				throw new WebSMSException(context, R.string.error_http, ""
 						+ resp);
 			}
-			String htmlText = Utils.stream2str(response.getEntity()
-					.getContent(), 0, Utils.ONLY_MATCHING_LINE, CHECK_FLOW);
-			final String flowExecutionKey = ConnectorO2
-					.getFlowExecutionkey(htmlText);
-			htmlText = null;
 
 			// login
-			if (!this.login(context, command, flowExecutionKey)) {
+			if (!this.login(context, command)) {
 				throw new WebSMSException(context, R.string.error);
 			}
 
@@ -544,14 +476,10 @@ public class ConnectorO2 extends Connector {
 			throw new WebSMSException(context, R.string.error_http, "" + resp);
 		}
 		String htmlText = null;
-		if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
-				Preferences.PREFS_TWEAK, false)) {
-			htmlText = Utils.stream2str(response.getEntity().getContent(),
-					STRIP_PRESEND_START, STRIP_PRESEND_END, CHECK_FREESMS);
-		} else {
-			htmlText = Utils.stream2str(response.getEntity().getContent(), 0,
-					-1, CHECK_FREESMS);
-		}
+
+		htmlText = Utils.stream2str(response.getEntity().getContent(), 0, -1,
+				CHECK_FREESMS);
+
 		if (htmlText == null) {
 			if (reuseSession) {
 				this.sendData(context, command, false);
@@ -566,9 +494,7 @@ public class ConnectorO2 extends Connector {
 			int j = htmlText.indexOf(CHECK_WEB2SMS, i);
 			if (j > 0) {
 				ConnectorSpec c = this.getSpec(context);
-				c
-						.setBalance(htmlText.substring(i + 9, j).trim().split(
-								" ", 2)[0]);
+				c.setBalance(htmlText.substring(i + 9, j).trim().split(" ", 2)[0]);
 				Log.d(TAG, "balance: " + c.getBalance());
 			} else if (reuseSession) {
 				// try again with clear session
@@ -613,6 +539,7 @@ public class ConnectorO2 extends Connector {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected final void gotSolvedCaptcha(final Context context,
 			final String solvedCaptcha) {
 		captchaSolve = solvedCaptcha;

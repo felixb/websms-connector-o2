@@ -18,14 +18,12 @@
 	-->
 <resources>
 	<string name="app_name">WebSMS Connector: o2</string>
-	<string name="app_version">1.7</string>
+	<string name="app_version">1.7.1</string>
 	<string name="connector_o2_author">Felix Bechstein &lt;f@ub0r.de&gt;, Lorenz Bauer</string>
 	<string name="connector_o2_name">o2</string>
 	<string name="connector_o2_preferences">Preferences - o2</string>
 	<string name="enable_o2">Enable o2</string>
 	<string name="password_o2_hint">Password for o2online.de</string>
-	<string name="tweak_">Tweak Connector</string>
-	<string name="tweak_hint">Try to tweak reading of the o2 website. This might fail for some.</string>
 	<string name="missing_freesms">Failed to retrieve free sms count.\nPlease check the o2 Communication Center with your browser.</string>
 	<string name="ignore_invalid_cert">Ignore invalid SSL certificates</string>
 	<string name="ignore_invalid_cert_hint">Temporary fix if sending fails. SMS are not sent securely.</string>
