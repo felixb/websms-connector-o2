@@ -591,6 +591,7 @@ public class ConnectorO2 extends Connector {
 	@Override
 	protected final void doUpdate(final Context context, final Intent intent)
 			throws IOException {
+		Utils.showUpdateNotification(context, "com.websms.connector.o2");
 		this.sendData(context, new ConnectorCommand(intent), true);
 	}
 
@@ -600,6 +601,7 @@ public class ConnectorO2 extends Connector {
 	@Override
 	protected final void doSend(final Context context, final Intent intent)
 			throws IOException {
+		Utils.showUpdateNotification(context, "com.websms.connector.o2");
 		this.sendData(context, new ConnectorCommand(intent), true);
 	}
 
