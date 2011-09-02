@@ -61,12 +61,9 @@ public class ConnectorO2 extends Connector {
 	/** URL before login. */
 	private static final String URL_PRELOGIN = "https://login.o2online.de/auth/login?scheme=https&port=443&server=email.o2online.de&url=%2Fssomanager.osp%3FAPIID%3DAUTH-WEBSSO";
 	/** URL for login. */
-	private static final String URL_LOGIN = "https://login.o2online.de/auth/login?wicket:interface=:12:loginForm::IFormSubmitListener::";
+	private static final String URL_LOGIN = "https://login.o2online.de/auth/?wicket:interface=:0:loginForm::IFormSubmitListener::";
 	/** URL of captcha. */
-	private static final String URL_CAPTCHA = "https://login.o2online.de"
-			+ "/loginRegistration/jcaptchaReg";
-	/** URL for solving captcha. */
-	private static final String URL_SOLVECAPTCHA = URL_LOGIN;
+	private static final String URL_CAPTCHA = "https://login.o2online.de/auth/?wicket:interface=:0:loginForm:captchaPanel:captchaImage::IResourceListener::";
 	/** URL for sms center. */
 	private static final String URL_SMSCENTER = "https://email.o2online.de/ssomanager.osp?APIID=AUTH-WEBSSO&TargetApp=/smscenter_new.osp%3f&o2_type=url&o2_label=web2sms-o2online";
 	/** URL before sending. */
@@ -89,9 +86,6 @@ public class ConnectorO2 extends Connector {
 
 	/** Check if message was scheduled. */
 	private static final String CHECK_SCHED = "Ihre Web2SMS ist geplant";
-	/** Check if captcha was solved wrong. */
-	private static final String CHECK_WRONGCAPTCHA = // .
-	"Sie haben einen falschen Code eingegeben.";
 
 	/** HTTP Useragent. */
 	private static final String TARGET_AGENT = "Mozilla/5.0 (Windows; U;"
@@ -168,7 +162,7 @@ public class ConnectorO2 extends Connector {
 	 * @throws IOException
 	 *             IOException
 	 */
-	private boolean solveCaptcha(final Context context) throws IOException {
+	private String solveCaptcha(final Context context) throws IOException {
 		HttpResponse response = this.getHttpClient(context, URL_CAPTCHA, null,
 				URL_LOGIN);
 		int resp = response.getStatusLine().getStatusCode();
@@ -188,30 +182,14 @@ public class ConnectorO2 extends Connector {
 			}
 		} catch (InterruptedException e) {
 			Log.e(TAG, null, e);
-			return false;
+			return null;
 		}
 		if (captchaSolve == null) {
-			return false;
+			return null;
 		}
 		// got user response, try to solve captcha
 		Log.d(TAG, "got solved captcha: " + captchaSolve);
-		final ArrayList<BasicNameValuePair> postData = // .
-		new ArrayList<BasicNameValuePair>(3);
-		postData.add(new BasicNameValuePair("_eventId", "submit"));
-		postData.add(new BasicNameValuePair("riddleValue", captchaSolve));
-		response = this.getHttpClient(context, URL_SOLVECAPTCHA, postData,
-				URL_LOGIN);
-		Log.d(TAG, postData.toString());
-		resp = response.getStatusLine().getStatusCode();
-		if (resp != HttpURLConnection.HTTP_OK) {
-			throw new WebSMSException(context, R.string.error_http, "" + resp);
-		}
-		final String mHtmlText = Utils.stream2str(response.getEntity()
-				.getContent());
-		if (mHtmlText.indexOf(CHECK_WRONGCAPTCHA) > 0) {
-			throw new WebSMSException(context, R.string.error_wrongcaptcha);
-		}
-		return true;
+		return captchaSolve;
 	}
 
 	/**
@@ -225,11 +203,19 @@ public class ConnectorO2 extends Connector {
 	 * @throws IOException
 	 *             IOException
 	 */
-	private boolean login(final Context context, final ConnectorCommand command)
+	private boolean login(final Context context,
+			final ConnectorCommand command, final String captcha)
 			throws IOException {
 		// post data
 		final ArrayList<BasicNameValuePair> postData = // .
-		new ArrayList<BasicNameValuePair>(2);
+		new ArrayList<BasicNameValuePair>(3);
+
+		if (captcha != null) {
+			Log.d(TAG, "Using captcha: " + captcha);
+			postData.add(new BasicNameValuePair(
+					"captchaPanel:captchaInput:response", captcha));
+		}
+
 		postData.add(new BasicNameValuePair("loginName:loginName", Utils
 				.international2national(command.getDefPrefix(),
 						Utils.getSenderNumber(context, command.getDefSender()))));
@@ -237,6 +223,7 @@ public class ConnectorO2 extends Connector {
 				.getDefaultSharedPreferences(context);
 		postData.add(new BasicNameValuePair("password:password", p.getString(
 				Preferences.PREFS_PASSWORD, "")));
+
 		int ccount = Utils.getCookieCount();
 		HttpResponse response = this.getHttpClient(context, URL_LOGIN,
 				postData, URL_PRELOGIN);
@@ -252,12 +239,15 @@ public class ConnectorO2 extends Connector {
 			htmlText = Utils.stream2str(response.getEntity().getContent());
 
 			response = null;
-			if (htmlText != null && htmlText.indexOf("captcha") > 0) {
+			if (htmlText != null && htmlText.indexOf("captchaPanel") > 0) {
 				htmlText = null;
-				if (!this.solveCaptcha(context)) {
+				String new_captcha;
+				if ((new_captcha = this.solveCaptcha(context)) == null) {
 					throw new WebSMSException(context,
 							R.string.error_wrongcaptcha);
 				}
+
+				this.login(context, command, new_captcha);
 			} else {
 				Log.d(TAG, htmlText);
 				throw new WebSMSException(context, R.string.error_pw);
@@ -444,7 +434,7 @@ public class ConnectorO2 extends Connector {
 			}
 
 			// login
-			if (!this.login(context, command)) {
+			if (!this.login(context, command, null)) {
 				throw new WebSMSException(context, R.string.error);
 			}
 
