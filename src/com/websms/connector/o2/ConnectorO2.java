@@ -103,7 +103,7 @@ public class ConnectorO2 extends Connector {
 	 * The current fingerprints of the SSL-certificate used by the https-sites.
 	 */
 	private static final String[] O2_SSL_FINGERPRINTS = {
-			"2c:b4:86:a8:da:87:77:3f:e4:b2:9d:26:6e:11:9e:00:3d:db:85:55",
+			"09:37:b0:df:67:b6:01:dd:2a:b6:0b:b1:f9:24:0f:3c:3f:77:77:2f", // login.o2online.de (2011-11-01)
 			"b0:36:f6:fd:0b:6f:28:75:ca:3b:5d:4a:91:07:ce:db:d0:0d:71:b0" };
 
 	/** (Setting) Ignore invalid SSL certificates */
