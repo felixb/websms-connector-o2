@@ -104,7 +104,8 @@ public class ConnectorO2 extends Connector {
 	 */
 	private static final String[] O2_SSL_FINGERPRINTS = {
 			"09:37:b0:df:67:b6:01:dd:2a:b6:0b:b1:f9:24:0f:3c:3f:77:77:2f", // login.o2online.de (2011-11-01)
-			"b0:36:f6:fd:0b:6f:28:75:ca:3b:5d:4a:91:07:ce:db:d0:0d:71:b0" };
+			"b0:36:f6:fd:0b:6f:28:75:ca:3b:5d:4a:91:07:ce:db:d0:0d:71:b0" // email.o2online.de (2011-04-14)
+		};
 
 	/** (Setting) Ignore invalid SSL certificates */
 	protected boolean mIgnoreCerts = false;
