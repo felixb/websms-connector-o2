@@ -152,8 +152,15 @@ public class ConnectorO2 extends Connector {
 			connectorSpec.setStatus(ConnectorSpec.STATUS_INACTIVE);
 		}
 
+		boolean oldIgnoreCerts = this.mIgnoreCerts;
 		this.mIgnoreCerts = p.getBoolean(Preferences.PREFS_IGNORE_CERTS, false);
 		Log.d(TAG, "Ignoring SSL certs = " + this.mIgnoreCerts);
+
+		if (oldIgnoreCerts != this.mIgnoreCerts) {
+			// the setting changed, we have to reset the client or it will
+			// not use the new setting
+			Utils.resetHttpClient();
+		}
 
 		return connectorSpec;
 	}
