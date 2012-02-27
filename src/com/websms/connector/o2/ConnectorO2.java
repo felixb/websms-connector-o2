@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.message.BasicNameValuePair;
@@ -32,6 +34,8 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.BitmapDrawable;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
+import de.ub0r.android.websms.connector.common.CharacterTable;
+import de.ub0r.android.websms.connector.common.CharacterTableSMSLengthCalculator;
 import de.ub0r.android.websms.connector.common.Connector;
 import de.ub0r.android.websms.connector.common.ConnectorCommand;
 import de.ub0r.android.websms.connector.common.ConnectorSpec;
@@ -113,6 +117,49 @@ public class ConnectorO2 extends Connector {
 	/** (Setting) Ignore invalid SSL certificates */
 	protected boolean mIgnoreCerts = false;
 
+	/** Mapping. */
+	private static final Map<String, String> MAP = new HashMap<String, String>(
+			512);
+
+	static {
+		MAP.put("\r", "");
+		// MAP.put("´", "'");
+
+		// turkish
+		MAP.put("\u00F7", "%"); // ÷
+		MAP.put("\u0130", "I"); // İ
+		MAP.put("\u0131", "i"); // ı
+		MAP.put("\u015E", "S"); // Ş
+		MAP.put("\u015F", "s"); // ş
+		MAP.put("\u00C7", "C"); // Ç
+		MAP.put("\u00E7", "c"); // ç
+		MAP.put("\u011E", "G"); // Ğ
+		MAP.put("\u011F", "g"); // ğ
+
+		// polish
+		MAP.put("\u0104", "A"); // Ą
+		MAP.put("\u0105", "a"); // ą
+		MAP.put("\u0106", "C"); // Ć
+		MAP.put("\u0107", "c"); // ć
+		MAP.put("\u0118", "E"); // Ę
+		MAP.put("\u0119", "e"); // ę
+		MAP.put("\u0141", "L"); // Ł
+		MAP.put("\u0142", "l"); // ł
+		MAP.put("\u0143", "N"); // Ń
+		MAP.put("\u0144", "n"); // ń
+		MAP.put("\u00D3", "O"); // Ó
+		MAP.put("\u015A", "S"); // Ś
+		MAP.put("\u015B", "s"); // ś
+		MAP.put("\u0179", "Z"); // Ź
+		MAP.put("\u017A", "z"); // ź
+		MAP.put("\u017B", "Z"); // Ż
+		MAP.put("\u017C", "z"); // ż
+		MAP.put("\u00F3", "o"); // ó
+	}
+
+	/** GMX's {@link CharacterTable}. */
+	private static final CharacterTable REPLACE = new CharacterTable(MAP);
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -123,6 +170,7 @@ public class ConnectorO2 extends Connector {
 		c.setAuthor(context.getString(R.string.connector_o2_author));
 		c.setAdUnitId(AD_UNITID);
 		c.setBalance(null);
+		c.setSMSLengthCalculator(new CharacterTableSMSLengthCalculator(REPLACE));
 		c.setCapabilities(ConnectorSpec.CAPABILITIES_UPDATE
 				| ConnectorSpec.CAPABILITIES_SEND
 				| ConnectorSpec.CAPABILITIES_PREFS);
@@ -309,7 +357,7 @@ public class ConnectorO2 extends Connector {
 		postData.add(new BasicNameValuePair("SMSTo", Utils
 				.national2international(command.getDefPrefix(),
 						Utils.getRecipientsNumber(command.getRecipients()[0]))));
-		postData.add(new BasicNameValuePair("SMSText", CharacterTable
+		postData.add(new BasicNameValuePair("SMSText", REPLACE
 				.encodeString(command.getText())));
 		String customSender = command.getCustomSender();
 		if (customSender == null) {
