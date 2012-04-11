@@ -36,11 +36,4 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>net.sf.eclipsecs.core.CheckstyleNature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>websms-api_src</name>
-			<type>2</type>
-			<locationURI>_android_websms_api_552de5d2/src</locationURI>
-		</link>
-	</linkedResources>
 </projectDescription>
