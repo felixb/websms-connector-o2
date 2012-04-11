@@ -27,4 +27,8 @@
 	<string name="ignore_invalid_cert">Ignore invalid SSL certificates</string>
 	<string name="ignore_invalid_cert_hint">Temporary fix if sending fails. SMS are not sent securely.</string>
 	<string name="error_invalid_cert">The Server did not properly identify itself (invalid SSL certificate). Please update this connector. If the problem persists, try turning on \'Ignore invalid SSL certificates\' in settings.</string>
+	<string name="custom_sender">Custom sender</string>
+	<string name="password">Password</string>
+	<string name="use_default_sender">Use default sender</string>
+	<string name="use_default_sender_hint">The default is provided by WebSMS.</string>
 </resources>

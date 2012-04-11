@@ -24,4 +24,8 @@
 	<string name="ignore_invalid_cert">Ingoriere ungültiges SSL-Zertifikat</string>
 	<string name="ignore_invalid_cert_hint">Temporäre Fehlerbehebung, falls das Senden fehlschlägt. SMS werden nicht sicher versendet.</string>
 	<string name="error_invalid_cert">Der Server konnte sich nicht ausweisen (ungültiges SSL Zertifikat). Bitte aktualisieren sie diesen Connector. Versuchen sie \'Ignoriere ungültige SSL-Zertifikate\' in den Einstellungen zu aktivieren falls das Problem weiter besteht.</string>
+	<string name="custom_sender">Eigener Absender</string>
+	<string name="password">Passwort</string>
+	<string name="use_default_sender">Benutze den Standardabsender</string>
+	<string name="use_default_sender_hint">Wird von WebSMS bereitgestellt.</string>
 </resources>
