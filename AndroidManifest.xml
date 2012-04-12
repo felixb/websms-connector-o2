@@ -17,10 +17,20 @@
 		not, see <http://www.gnu.org/licenses/>.
 	-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="com.websms.connector.o2" android:versionName="1.7.3"
-	android:versionCode="1703">
+	package="com.websms.connector.o2" android:versionName="1.7.4"
+	android:versionCode="1704">
+	<uses-sdk android:minSdkVersion="4" android:targetSdkVersion="13" />
+	<supports-screens android:smallScreens="true"
+		android:normalScreens="true" android:largeScreens="true"
+		android:anyDensity="true" />
+	<uses-feature android:name="android.hardware.touchscreen"
+		android:required="false" />
+	
+	<uses-permission android:name="android.permission.INTERNET" />
+	<!-- WAKE_LOCK needed to make sure, sms are send even if user sends device to sleep. -->
+	<uses-permission android:name="android.permission.WAKE_LOCK" />
+	
 	<application android:label="@string/app_name" android:icon="@drawable/icon">
-
 		<!--
 			This Activity is brought by the WebSMS Connector Plugin API. It shows
 			a simple information about this connector when launching it via
@@ -55,13 +65,4 @@
 			</intent-filter>
 		</receiver>
 	</application>
-	<uses-sdk android:minSdkVersion="4" android:targetSdkVersion="13" />
-	<supports-screens android:smallScreens="true"
-		android:normalScreens="true" android:largeScreens="true"
-		android:anyDensity="true" />
-	<uses-feature android:name="android.hardware.touchscreen"
-		android:required="false" />
-	<uses-permission android:name="android.permission.INTERNET" />
-	<!-- WAKE_LOCK needed to make sure, sms are send even if user sends device to sleep. -->
-	<uses-permission android:name="android.permission.WAKE_LOCK" />
 </manifest> 
