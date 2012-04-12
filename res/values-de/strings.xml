@@ -19,13 +19,14 @@
 <resources>
 	<string name="connector_o2_preferences">Einstellungen - o2</string>
 	<string name="enable_o2">Aktiviere o2</string>
-	<string name="password_o2_hint">Passwort für o2online.de</string>
+	<string name="password_o2_hint">Für o2online.de</string>
 	<string name="missing_freesms">Zugriff auf FreeSMS nicht möglich.\nBitte überprüfe das o2 Communication Center mit einem Browser.</string>
 	<string name="ignore_invalid_cert">Ingoriere ungültiges SSL-Zertifikat</string>
 	<string name="ignore_invalid_cert_hint">Temporäre Fehlerbehebung, falls das Senden fehlschlägt. SMS werden nicht sicher versendet.</string>
 	<string name="error_invalid_cert">Der Server konnte sich nicht ausweisen (ungültiges SSL Zertifikat). Bitte aktualisieren sie diesen Connector. Versuchen sie \'Ignoriere ungültige SSL-Zertifikate\' in den Einstellungen zu aktivieren falls das Problem weiter besteht.</string>
-	<string name="custom_sender">Eigener Absender</string>
+	<string name="custom_sender">Eigener Nutzername</string>
+	<string name="custom_sender_hint">Üblicherweise deine O2 Nummer.</string>
 	<string name="password">Passwort</string>
-	<string name="use_default_sender">Benutze den Standardabsender</string>
-	<string name="use_default_sender_hint">Wird von WebSMS bereitgestellt.</string>
+	<string name="use_default_sender">WebSMS Standardabsender nutzen</string>
+	<string name="use_default_sender_hint">Als Nutzername für o2online.de.</string>
 </resources>

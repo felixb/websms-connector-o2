@@ -29,6 +29,6 @@
 		android:disableDependentsState="true" android:dependency="enable_o2" />
 	<EditTextPreference android:key="custom_sender"
 		android:title="@string/custom_sender" android:dialogTitle="@string/custom_sender"
-		android:summary="@string/sender_hint" android:dependency="use_default_sender" />
+		android:summary="@string/custom_sender_hint" android:dependency="use_default_sender" />
 	<CheckBoxPreference android:title="@string/ignore_invalid_cert" android:summary="@string/ignore_invalid_cert_hint" android:dependency="enable_o2" android:key="ignore_invalid_cert"></CheckBoxPreference>
 </PreferenceScreen>

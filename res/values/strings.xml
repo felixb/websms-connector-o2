@@ -22,13 +22,14 @@
 	<string name="connector_o2_name">o2</string>
 	<string name="connector_o2_preferences">Preferences - o2</string>
 	<string name="enable_o2">Enable o2</string>
-	<string name="password_o2_hint">Password for o2online.de</string>
+	<string name="password_o2_hint">For o2online.de</string>
 	<string name="missing_freesms">Failed to retrieve free sms count.\nPlease check the o2 Communication Center with your browser.</string>
 	<string name="ignore_invalid_cert">Ignore invalid SSL certificates</string>
 	<string name="ignore_invalid_cert_hint">Temporary fix if sending fails. SMS are not sent securely.</string>
 	<string name="error_invalid_cert">The Server did not properly identify itself (invalid SSL certificate). Please update this connector. If the problem persists, try turning on \'Ignore invalid SSL certificates\' in settings.</string>
-	<string name="custom_sender">Custom sender</string>
+	<string name="custom_sender">Custom username</string>
+	<string name="custom_sender_hint">Usually your O2 phone number.</string>
 	<string name="password">Password</string>
-	<string name="use_default_sender">Use default sender</string>
-	<string name="use_default_sender_hint">The default is provided by WebSMS.</string>
+	<string name="use_default_sender">Use WebSMS default sender</string>
+	<string name="use_default_sender_hint">As username for o2online.de.</string>
 </resources>
