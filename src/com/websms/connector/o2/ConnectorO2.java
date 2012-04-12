@@ -112,7 +112,9 @@ public class ConnectorO2 extends Connector {
 			// login.o2online.de (2011-11-01)
 			"09:37:b0:df:67:b6:01:dd:2a:b6:0b:b1:f9:24:0f:3c:3f:77:77:2f",
 			// email.o2online.de (2011-04-14)
-			"b0:36:f6:fd:0b:6f:28:75:ca:3b:5d:4a:91:07:ce:db:d0:0d:71:b0" };
+			"b0:36:f6:fd:0b:6f:28:75:ca:3b:5d:4a:91:07:ce:db:d0:0d:71:b0",
+			// email.o2online.de (2012-04-10)
+			"a8:d1:74:21:71:61:d5:e7:d0:6f:ee:4b:ea:f0:ee:4e:0a:09:04:83" };
 
 	/** (Setting) Ignore invalid SSL certificates */
 	protected boolean mIgnoreCerts = false;
@@ -123,38 +125,38 @@ public class ConnectorO2 extends Connector {
 
 	static {
 		MAP.put("\r", "");
-		// MAP.put("´", "'");
+		// MAP.put("Â´", "'");
 
 		// turkish
-		MAP.put("\u00F7", "%"); // ÷
-		MAP.put("\u0130", "I"); // İ
-		MAP.put("\u0131", "i"); // ı
-		MAP.put("\u015E", "S"); // Ş
-		MAP.put("\u015F", "s"); // ş
-		MAP.put("\u00C7", "C"); // Ç
-		MAP.put("\u00E7", "c"); // ç
-		MAP.put("\u011E", "G"); // Ğ
-		MAP.put("\u011F", "g"); // ğ
+		MAP.put("\u00F7", "%"); // Ã·
+		MAP.put("\u0130", "I"); // Ä°
+		MAP.put("\u0131", "i"); // Ä±
+		MAP.put("\u015E", "S"); // Åž
+		MAP.put("\u015F", "s"); // ÅŸ
+		MAP.put("\u00C7", "C"); // Ã‡
+		MAP.put("\u00E7", "c"); // Ã§
+		MAP.put("\u011E", "G"); // Äž
+		MAP.put("\u011F", "g"); // ÄŸ
 
 		// polish
-		MAP.put("\u0104", "A"); // Ą
-		MAP.put("\u0105", "a"); // ą
-		MAP.put("\u0106", "C"); // Ć
-		MAP.put("\u0107", "c"); // ć
-		MAP.put("\u0118", "E"); // Ę
-		MAP.put("\u0119", "e"); // ę
-		MAP.put("\u0141", "L"); // Ł
-		MAP.put("\u0142", "l"); // ł
-		MAP.put("\u0143", "N"); // Ń
-		MAP.put("\u0144", "n"); // ń
-		MAP.put("\u00D3", "O"); // Ó
-		MAP.put("\u015A", "S"); // Ś
-		MAP.put("\u015B", "s"); // ś
-		MAP.put("\u0179", "Z"); // Ź
-		MAP.put("\u017A", "z"); // ź
-		MAP.put("\u017B", "Z"); // Ż
-		MAP.put("\u017C", "z"); // ż
-		MAP.put("\u00F3", "o"); // ó
+		MAP.put("\u0104", "A"); // Ä„
+		MAP.put("\u0105", "a"); // Ä…
+		MAP.put("\u0106", "C"); // Ä†
+		MAP.put("\u0107", "c"); // Ä‡
+		MAP.put("\u0118", "E"); // Ä˜
+		MAP.put("\u0119", "e"); // Ä™
+		MAP.put("\u0141", "L"); // Å�
+		MAP.put("\u0142", "l"); // Å‚
+		MAP.put("\u0143", "N"); // Åƒ
+		MAP.put("\u0144", "n"); // Å„
+		MAP.put("\u00D3", "O"); // Ã“
+		MAP.put("\u015A", "S"); // Åš
+		MAP.put("\u015B", "s"); // Å›
+		MAP.put("\u0179", "Z"); // Å¹
+		MAP.put("\u017A", "z"); // Åº
+		MAP.put("\u017B", "Z"); // Å»
+		MAP.put("\u017C", "z"); // Å¼
+		MAP.put("\u00F3", "o"); // Ã³
 	}
 
 	/** GMX's {@link CharacterTable}. */
