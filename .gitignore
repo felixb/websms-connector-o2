@@ -5,3 +5,4 @@ local.properties
 wiki
 build.properties
 doc
+proguard/*
