@@ -42,6 +42,7 @@ import de.ub0r.android.websms.connector.common.ConnectorSpec;
 import de.ub0r.android.websms.connector.common.ConnectorSpec.SubConnectorSpec;
 import de.ub0r.android.websms.connector.common.Log;
 import de.ub0r.android.websms.connector.common.Utils;
+import de.ub0r.android.websms.connector.common.Utils.HttpOptions;
 import de.ub0r.android.websms.connector.common.WebSMSException;
 
 /**
@@ -604,8 +605,15 @@ public class ConnectorO2 extends Connector {
 			final String url, final ArrayList<BasicNameValuePair> postData,
 			final String referer) {
 		try {
-			return Utils.getHttpClient(url, null, postData, TARGET_AGENT,
-					referer, ENCODING, this.mIgnoreCerts, O2_SSL_FINGERPRINTS);
+			HttpOptions options = new HttpOptions(ENCODING);
+			options.url = url;
+			options.userAgent = TARGET_AGENT;
+			options.referer = referer;
+			options.trustAll = this.mIgnoreCerts;
+			options.knownFingerprints = O2_SSL_FINGERPRINTS.clone();
+			options.addFormParameter(postData);
+
+			return Utils.getHttpClient(options);
 		} catch (javax.net.ssl.SSLException e) {
 			throw new WebSMSException(context, R.string.error_invalid_cert);
 		} catch (IOException e) {
