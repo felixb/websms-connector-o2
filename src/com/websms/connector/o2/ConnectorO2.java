@@ -209,9 +209,6 @@ public class ConnectorO2 extends Connector {
 			connectorSpec.setStatus(ConnectorSpec.STATUS_INACTIVE);
 		}
 
-		// TODO: Remove this when upstream is fixed
-		Utils.setVerboseLog(true);
-
 		boolean oldIgnoreCerts = this.mIgnoreCerts;
 		this.mIgnoreCerts = p.getBoolean(Preferences.PREFS_IGNORE_CERTS, false);
 		Log.d(TAG, "Ignoring SSL certs = " + this.mIgnoreCerts);
