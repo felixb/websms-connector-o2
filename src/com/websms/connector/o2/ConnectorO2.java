@@ -55,7 +55,7 @@ public class ConnectorO2 extends Connector {
 	private static final String TAG = "o2";
 
 	/** Google's ad unit id. */
-	private static final String AD_UNITID = "a14dd555326b466";
+	private static final String AD_UNITID = "a14ec13d3c244b7";
 
 	/** Used encoding. */
 	private static final String ENCODING = "ISO-8859-15";
