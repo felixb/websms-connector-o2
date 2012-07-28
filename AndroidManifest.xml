@@ -17,8 +17,8 @@
 		not, see <http://www.gnu.org/licenses/>.
 	-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="com.websms.connector.o2" android:versionName="1.7.4"
-	android:versionCode="1704">
+	package="com.websms.connector.o2" android:versionName="1.7.5"
+	android:versionCode="1705">
 	<uses-sdk android:minSdkVersion="4" android:targetSdkVersion="13" />
 	<supports-screens android:smallScreens="true"
 		android:normalScreens="true" android:largeScreens="true"
