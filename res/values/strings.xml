@@ -32,4 +32,5 @@
 	<string name="password">Password</string>
 	<string name="use_default_sender">Use WebSMS default sender</string>
 	<string name="use_default_sender_hint">As username for o2online.de.</string>
+	<string name="error_custom_sender">Custom sender mustn\'t be longer than 12 characters</string>
 </resources>

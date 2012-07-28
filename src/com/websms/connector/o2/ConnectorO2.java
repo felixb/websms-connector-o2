@@ -159,6 +159,11 @@ public class ConnectorO2 extends Connector {
 		MAP.put("\u017B", "Z"); // Å»
 		MAP.put("\u017C", "z"); // Å¼
 		MAP.put("\u00F3", "o"); // Ã³
+
+		// Quotation marks
+		// http://code.google.com/p/websmsdroid/issues/detail?id=552
+		MAP.put("\u201C", "\""); // Left dbl quotation mark
+		MAP.put("\u201D", "\""); // Right dbl quotation mark
 	}
 
 	/** GMX's {@link CharacterTable}. */
@@ -380,6 +385,12 @@ public class ConnectorO2 extends Connector {
 			if (customSender.length() == 0) {
 				postData.add(new BasicNameValuePair("FlagAnonymous", "1"));
 			} else {
+				if (customSender.length() > 12) {
+					// http://code.google.com/p/websmsdroid/issues/detail?id=551
+					throw new WebSMSException(context,
+							R.string.error_custom_sender);
+				}
+
 				postData.add(new BasicNameValuePair("FlagAnonymous", "0"));
 				postData.add(new BasicNameValuePair("FlagDefSender", "1"));
 			}

@@ -29,4 +29,5 @@
 	<string name="password">Passwort</string>
 	<string name="use_default_sender">WebSMS Standardabsender nutzen</string>
 	<string name="use_default_sender_hint">Als Nutzername für o2online.de.</string>
+	<string name="error_custom_sender">Anderer Absender muss kürzer als 13 Zeichen sein</string>
 </resources>
