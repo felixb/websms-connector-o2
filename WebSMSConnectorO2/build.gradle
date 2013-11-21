@@ -1,0 +1,36 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.6.+'
+    }
+}
+apply plugin: 'android'
+
+repositories {
+    maven {
+        url 'https://github.com/felixb/websms-api/raw/mvn-repo/'
+    }
+    mavenCentral()
+}
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion "19.0.0"
+
+    defaultConfig {
+        minSdkVersion 7
+        targetSdkVersion 19
+    }
+    buildTypes {
+        release {
+            runProguard true
+            proguardFile 'proguard.cfg'
+        }
+    }
+}
+
+dependencies {
+    compile 'de.ub0r.android.websms.connector.common:WebSMSAPI:1.0'
+}
